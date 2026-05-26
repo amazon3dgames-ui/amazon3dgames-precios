@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Precios — Amazon 3D Games</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f; --surface: #111118; --surface2: #18181f;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+    --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.12);
+    --text: #f0f0f5; --text-muted: #6b6b80; --text-dim: #3a3a4a;
+    --green: #22c55e; --amber: #f59e0b;
+    --sans: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  }
+  html { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; }
+  body { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+  .dolar-pill { position: fixed; top: 16px; right: 20px; background: var(--surface2); border: 1px solid rgba(59,130,246,0.25); border-radius: 6px; padding: 5px 12px; display: flex; align-items: center; gap: 8px; z-index: 100; }
+  .dolar-pill .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .dolar-pill .value { font-family: var(--mono); font-size: 13px; color: var(--blue); font-weight: 500; }
+  header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding-bottom: 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .brand { display: flex; justify-content: center; }
+  .brand svg { width: 280px; height: auto; margin-bottom: -30px; }
+  .contact-bar { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; justify-content: center; }
+  .contact-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text-muted); }
+  .contact-item .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+  .notices { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 40px; display: grid; gap: 6px; }
+  .notice { font-size: 12px; color: var(--text-muted); line-height: 1.6; padding-left: 14px; position: relative; font-weight: 700; }
+  .notice::before { content: '—'; position: absolute; left: 0; color: var(--text-dim); }
+  .tabs { display: flex; gap: 2px; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 10px 20px; font-size: 15px; font-weight: 700; font-family: var(--sans); cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; margin-bottom: -1px; background: none; border-top: none; border-left: none; border-right: none; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .section { margin-bottom: 48px; }
+  .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+  .table-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .col-header { display: grid; grid-template-columns: 1fr 100px 130px 90px; padding: 9px 18px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .col-header span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); font-weight: 500; }
+  .col-header span:not(:first-child) { text-align: right; }
+  .product-row { display: grid; grid-template-columns: 1fr 100px 130px 90px; padding: 12px 18px; border-bottom: 1px solid var(--border); align-items: center; transition: background 0.15s; }
+  .product-row:last-child { border-bottom: none; }
+  .product-row:hover { background: rgba(255,255,255,0.02); }
+  .product-row.group-start { border-top: 1px solid var(--border2); }
+  .product-name { font-size: 13px; color: var(--text); font-weight: 400; }
+  .product-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .badge-new { display: inline-block; background: var(--blue-dim); border: 1px solid rgba(59,130,246,0.4); color: var(--blue); font-size: 9px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; position: relative; top: -1px; }
+  .badge-pedido { display: inline-block; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--amber); font-size: 9px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; position: relative; top: -1px; }
+  .price-usd { font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-align: right; font-weight: 700; }
+  .price-ars { font-family: var(--mono); font-size: 12px; color: var(--text); text-align: right; font-weight: 300; }
+  .price-ars.zero { color: var(--text-dim); }
+  .stock-cell { text-align: right; }
+  .stock-pill { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; }
+  .stock-pill.in { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .stock-pill.consult { background: rgba(245,158,11,0.08); color: var(--amber); border: 1px solid rgba(245,158,11,0.15); }
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-dim); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  @media (max-width: 600px) {
+    .col-header, .product-row { grid-template-columns: 1fr 70px 90px 62px; padding: 8px 10px; }
+    .product-name { font-size: 11px; }
+    .badge-new, .badge-pedido { display: block; margin-left: 0; margin-top: 3px; font-size: 8px; padding: 1px 5px; width: fit-content; }
+    .product-sub { font-size: 10px; }
+    .price-usd { font-size: 10px; }
+    .price-ars { font-size: 10px; }
+    .stock-pill { font-size: 9px; padding: 2px 5px; }
+    .col-header span { font-size: 9px; }
+    .tabs { overflow-x: auto; }
+    .tab { font-size: 13px; padding: 8px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dolar-pill">
+  <div class="label">Dólar hoy</div>
+  <div class="value" id="dolar-display"></div>
+</div>
+
+<header>
+  <span></span>
+  <div class="brand">
+    <svg viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="pB" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60b8ff"/><stop offset="100%" stop-color="#1a6fd4"/></linearGradient>
+        <linearGradient id="tB" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#90d0ff"/><stop offset="100%" stop-color="#1e7fff"/></linearGradient>
+        <linearGradient id="rB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#60b8ff"/><stop offset="100%" stop-color="#1a4fa0"/></linearGradient>
+      </defs>
+      <circle cx="340" cy="290" r="220" fill="none" stroke="url(#rB)" stroke-width="4" opacity="0.95"/>
+      <circle cx="340" cy="290" r="207" fill="none" stroke="#4aa0ef" stroke-width="1.5" opacity="0.5"/>
+      <circle cx="340" cy="290" r="194" fill="none" stroke="#2266bb" stroke-width="1" opacity="0.3"/>
+      <rect x="304" y="138" width="72" height="122" rx="12" fill="none" stroke="url(#pB)" stroke-width="3.5"/>
+      <rect x="314" y="153" width="52" height="86" rx="3" fill="#1a6fd4" opacity="0.18"/>
+      <rect x="326" y="145" width="28" height="3.5" rx="2" fill="#60b8ff" opacity="0.7"/>
+      <circle cx="316" cy="147" r="2.5" fill="#60b8ff" opacity="0.5"/>
+      <rect x="328" y="252" width="24" height="3" rx="1.5" fill="#60b8ff" opacity="0.7"/>
+      <text x="340" y="326" text-anchor="middle" font-family="Trebuchet MS,sans-serif" font-size="42" font-weight="700" fill="url(#tB)" letter-spacing="10">AMAZON</text>
+      <text x="340" y="366" text-anchor="middle" font-family="Trebuchet MS,sans-serif" font-size="21" font-weight="400" fill="#90d0ff" letter-spacing="9" opacity="0.85">3D GAMES</text>
+      <line x1="240" y1="382" x2="440" y2="382" stroke="#4aa0ef" stroke-width="1.5" opacity="0.6"/>
+    </svg>
+  </div>
+  <span></span>
+</header>
+
+<div class="contact-bar">
+  <div class="contact-item"><div class="dot"></div>11-3401-2407</div>
+  <div class="contact-item"><div class="dot"></div>amazon3dgames@gmail.com</div>
+  <div class="contact-item"><div class="dot"></div>@amazon3dgames</div>
+  <div class="contact-item"><div class="dot"></div>USD · Pesos · USDT</div>
+</div>
+
+<div class="notices">
+  <div class="notice">Envíos a todo el país mediante OCA o Sendbox</div>
+  <div class="notice">Retiro en CABA o envío por mensajería dentro de Capital y alrededores (consultar tarifas)</div>
+  <div class="notice">Efectivo en dólares o pesos / USDT / transferencia en pesos (consultar)</div>
+  <div class="notice">Precios en pesos sujetos a la cotización al momento de la entrega</div>
+  <div class="notice">No se aceptan dólares rotos, manchados o serie vieja (cara chica)</div>
+  <div class="notice">Todos los teléfonos son 100% originales, nuevos en caja cerrada y libres de origen con garantía de 3 a 12 meses</div>
+  <div class="notice">Si buscás un modelo que no está en la lista, consultanos</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('cels', this)">Celulares · Tablets · Varios</button>
+  <button class="tab" onclick="showTab('mac', this)">MacBook · iPad · iMac</button>
+  <button class="tab" onclick="showTab('note', this)">Notebooks</button>
+</div>
+
+<div id="tab-cels" class="tab-content active"></div>
+<div id="tab-mac" class="tab-content"></div>
+<div id="tab-note" class="tab-content"></div>
+
+<footer>
+  <span>amazon3dgames@gmail.com · 11-3401-2407</span>
+  <span>Precios en pesos sujetos a cotización del dólar al momento de la entrega</span>
+</footer>
+
+<script>
+// ============================================================
+//  ✏️  ZONA DE EDICIÓN — Solo modificá este bloque
+// ============================================================
+
+// 👉 Tipo de cambio: cambiá este número cuando suba o baje el dólar
+const DOLAR = 1440;
+
+// 👉 Datos de productos
+// Formato de cada producto:
+//   { n: "Nombre",        → nombre del producto
+//     s: "sub texto",     → subtítulo opcional (colores, specs) — borrar si no aplica
+//     u: 760,             → precio en USD (número). null = consultar
+//     g: true,            → true = en stock, false = consultar
+//     b: "new",           → badge opcional: "new" o "pedido" — borrar si no aplica
+//     gs: true }          → true = línea separadora arriba (inicio de grupo)
+
+const CATALOGO = {
+
+  // ── PESTAÑA 1: CELULARES · TABLETS · VARIOS ──────────────
+
+  cels: [
+
+    { seccion: "Apple · iPhone", items: [
+      { n: "iPhone 15 128GB", u: null, g: false },
+      { n: "iPhone 15 256GB", u: null, g: false },
+      { n: "iPhone 16E 128GB", u: null, g: false, gs: true },
+      { n: "iPhone 16E 256GB", u: null, g: false },
+      { n: "iPhone 16 128GB", u: 760, g: true, gs: true },
+      { n: "iPhone 16 256GB", u: null, g: false },
+      { n: "iPhone 16 Plus 128GB", u: null, g: false, gs: true },
+      { n: "iPhone 16 Plus 256GB", u: null, g: false },
+      { n: "iPhone 16 Pro Max 256GB", u: 1275, g: true, gs: true },
+      { n: "iPhone 17E 256GB", u: 665, g: true, gs: true, b: "new" },
+      { n: "iPhone 17 256GB", u: 850, g: true, gs: true },
+      { n: "iPhone 17 Air 256GB", u: 1040, g: true, gs: true },
+      { n: "iPhone 17 Pro 256GB", s: "Orange · Silver · Blue", u: 1320, g: true, gs: true },
+      { n: "iPhone 17 Pro 512GB", s: "Orange · Silver · Blue", u: 1530, g: true },
+      { n: "iPhone 17 Pro 1TB", s: "Orange · Silver · Blue", u: 1750, g: true },
+      { n: "iPhone 17 Pro Max 256GB", s: "Orange · Silver · Blue", u: 1460, g: true, gs: true },
+      { n: "iPhone 17 Pro Max 512GB", s: "Orange", u: 1640, g: true },
+      { n: "iPhone 17 Pro Max 512GB", s: "Silver · Blue", u: 1650, g: true },
+      { n: "iPhone 17 Pro Max 1TB", s: "Orange · Silver · Blue", u: 1870, g: true },
+      { n: "iPhone 17 Pro Max 2TB", s: "Silver", u: 2230, g: true },
+    ]},
+
+    { seccion: "Apple · Watch", items: [
+      { n: "Apple Watch SE 3 · 40mm", s: "Midnight SM · Starlight SM", u: 320, g: true },
+      { n: "Apple Watch SE 3 · 44mm", s: "Midnight Aluminium Sport Band", u: 355, g: true },
+      { n: "Apple Watch Series 11 · 42mm", s: "Silver · Rose Gold", u: 410, g: true, gs: true },
+      { n: "Apple Watch Series 11 · 46mm", s: "Jet Black · Space Gray", u: 445, g: true },
+      { n: "Apple Watch Ultra 3 · 49mm", s: "Black Titanium · Ocean / Anchor Blue / Alpine / Charcoal Trail", u: 840, g: true, gs: true },
+    ]},
+
+    { seccion: "Apple · AirPods & Accesorios", items: [
+      { n: "AirPods 4ta gen · Wireless USB-C", u: 170, g: true },
+      { n: "AirPods 4ta gen · Noise Cancelling", u: 205, g: true },
+      { n: "AirPods Pro 3ra gen (2025)", u: 295, g: true, gs: true },
+      { n: "AirPods Max USB-C", u: null, g: false, gs: true },
+      { n: "HomePod 2", u: null, g: false, gs: true, b: "new" },
+      { n: "Apple Adaptador 20W (original)", u: 35, g: true, gs: true },
+      { n: "Apple Adaptador 40W (original)", u: 50, g: true, b: "new" },
+      { n: "Apple MagSafe Duo (original)", u: null, g: false },
+    ]},
+
+    { seccion: "Samsung · Celulares", items: [
+      { n: "Samsung A06 4GB / 64GB", u: 145, g: true },
+      { n: "Samsung A06 4GB / 128GB", u: null, g: false },
+      { n: "Samsung A07 4GB / 64GB", u: 160, g: true, gs: true },
+      { n: "Samsung A07 4GB / 128GB", u: 180, g: true },
+      { n: "Samsung A17 4GB / 128GB", u: 215, g: true, gs: true },
+      { n: "Samsung A17 6GB / 128GB", u: null, g: false },
+      { n: "Samsung A17 8GB / 256GB", u: null, g: false },
+      { n: "Samsung A17 6GB / 128GB (5G)", u: null, g: false, gs: true },
+      { n: "Samsung A17 8GB / 256GB (5G)", u: null, g: false },
+      { n: "Samsung A26 6GB / 128GB (5G)", u: null, g: false, gs: true },
+      { n: "Samsung A26 8GB / 256GB (5G)", u: 315, g: true },
+      { n: "Samsung A37 6GB / 128GB (5G)", u: 370, g: true, gs: true, b: "new" },
+      { n: "Samsung A37 8GB / 256GB (5G)", u: 440, g: true, b: "new" },
+      { n: "Samsung A56 12GB / 256GB (5G)", u: 500, g: true, gs: true },
+      { n: "Samsung A57 8GB / 128GB (5G)", u: 440, g: true, gs: true, b: "new" },
+      { n: "Samsung A57 8GB / 256GB (5G)", u: 495, g: true, b: "new" },
+      { n: "Samsung A57 12GB / 512GB (5G)", u: 670, g: true, b: "new" },
+      { n: "Samsung S25 FE 8GB / 256GB", u: 600, g: true, gs: true },
+      { n: "Samsung S25 FE 8GB / 512GB", u: 650, g: true },
+      { n: "Samsung S25 12GB / 256GB", u: 755, g: true, gs: true },
+      { n: "Samsung S25+ 12GB / 256GB", u: 880, g: true, gs: true },
+      { n: "Samsung S25 Ultra 12GB / 256GB", u: 1000, g: true, gs: true },
+      { n: "Samsung S25 Ultra 12GB / 512GB", u: 1070, g: true },
+      { n: "Samsung S25 Ultra 12GB / 1TB", u: 1140, g: true },
+      { n: "Samsung S26 12GB / 256GB", u: 830, g: true, gs: true, b: "new" },
+      { n: "Samsung S26 12GB / 512GB", u: 1010, g: true, b: "new" },
+      { n: "Samsung S26 Plus 12GB / 256GB", u: 1080, g: true, gs: true, b: "new" },
+      { n: "Samsung S26 Plus 12GB / 512GB", u: 1190, g: true, b: "new" },
+      { n: "Samsung S26 Ultra 12GB / 256GB", u: 1185, g: true, gs: true, b: "new" },
+      { n: "Samsung S26 Ultra 12GB / 512GB", u: 1295, g: true, b: "new" },
+      { n: "Samsung S26 Ultra 16GB / 1TB", u: 1550, g: true, b: "new" },
+    ]},
+
+    { seccion: "Samsung · Tablets", items: [
+      { n: "Galaxy Tab A11 8.7\" · 4/128GB (WiFi)", u: 280, g: true },
+      { n: "Galaxy Tab A11+ 11\" · 6/128GB (WiFi)", u: 295, g: true, gs: true },
+      { n: "Galaxy Tab A11+ 11\" · 8/256GB (WiFi)", u: 340, g: true },
+      { n: "Galaxy Tab S11 11\" · 12/128GB (WiFi)", u: null, g: false, gs: true },
+      { n: "Galaxy Tab S11 Ultra 14.6\" · 12/256GB (WiFi)", u: null, g: false, gs: true },
+    ]},
+
+    { seccion: "Motorola", items: [
+      { n: "Moto G06 4GB / 64GB", u: null, g: false },
+      { n: "Moto G06 4GB / 128GB", u: 155, g: true },
+      { n: "Moto G06 4GB / 256GB", u: 175, g: true },
+      { n: "Moto G06 Power 4GB / 256GB", u: 185, g: true, gs: true },
+      { n: "Moto G15 4GB / 128GB (s/cargador)", u: null, g: false, gs: true },
+      { n: "Moto G15 4GB / 256GB", u: 205, g: true },
+      { n: "Moto G15 4GB / 512GB", u: 220, g: true },
+      { n: "Moto G15 Power 8GB / 512GB (s/cargador)", u: null, g: false, gs: true },
+      { n: "Moto G17 4GB / 256GB", u: 250, g: true, gs: true, b: "new" },
+      { n: "Moto G17 Power 8GB / 256GB", u: 270, g: true, gs: true, b: "new" },
+      { n: "Moto G35 4GB / 64GB (5G)", u: null, g: false, gs: true },
+      { n: "Moto G35 4GB / 256GB (5G)", u: null, g: false },
+      { n: "Moto G35 8GB / 256GB (5G, s/cargador)", u: 225, g: true },
+      { n: "Moto G56 8GB / 256GB (5G)", u: null, g: false, gs: true },
+      { n: "Moto G56 8GB / 512GB (5G, s/cargador)", u: 280, g: true },
+      { n: "Moto G77 8GB / 256GB (5G)", u: 340, g: true, gs: true, b: "new" },
+      { n: "Moto G86 8GB / 256GB (5G)", u: 295, g: true, gs: true },
+      { n: "Moto G86 Power 8GB / 512GB (5G)", u: 315, g: true, gs: true },
+      { n: "Moto G96 8GB / 128GB (5G)", u: 315, g: true, gs: true, b: "new" },
+      { n: "Edge 50 12GB / 512GB (5G, s/cargador)", u: 385, g: true, gs: true },
+      { n: "Edge 50 12GB / 512GB (5G)", u: 395, g: true },
+      { n: "Edge 50 Fusion 8GB / 256GB (5G, s/cargador)", u: 280, g: true, gs: true },
+      { n: "Edge 50 Fusion 8GB / 256GB (5G)", u: null, g: false },
+      { n: "Edge 60 Fusion 8GB / 256GB (5G, s/cargador)", u: null, g: false, gs: true },
+      { n: "Edge 60 Fusion 8GB / 256GB (5G)", u: 330, g: true },
+      { n: "Edge 60 Fusion 12GB / 256GB (5G, s/cargador)", u: 355, g: true },
+      { n: "Edge 60 Fusion 12GB / 256GB (5G)", u: 360, g: true },
+      { n: "Edge 60 Neo 8GB / 256GB (5G, s/cargador)", u: 400, g: true, gs: true },
+      { n: "Edge 60 Pro 8GB / 256GB (5G, s/cargador)", u: 495, g: true, gs: true },
+      { n: "Edge 60 Pro 16GB / 512GB (5G)", u: 575, g: true },
+      { n: "Edge 70 8GB / 256GB (5G)", u: 535, g: true, gs: true, b: "new" },
+      { n: "Edge 70 12GB / 512GB (5G)", u: 695, g: true, b: "new" },
+      { n: "Edge 70 Fusion 8GB / 256GB (5G)", u: 515, g: true, gs: true, b: "new" },
+      { n: "Moto Razr 50 12GB / 512GB (5G)", u: 700, g: true, gs: true },
+      { n: "Moto Razr 60 12GB / 512GB (5G)", u: null, g: false, gs: true, b: "new" },
+      { n: "Moto Razr Ultra 60 16GB / 512GB (5G)", u: null, g: false, gs: true, b: "new" },
+    ]},
+
+    { seccion: "Xiaomi · Poco · Redmi (4G)", items: [
+      { n: "Poco C71 3GB / 64GB", u: null, g: false },
+      { n: "Poco C71 4GB / 128GB", u: null, g: false },
+      { n: "Poco C85 6GB / 128GB", u: null, g: false, gs: true, b: "new" },
+      { n: "Poco C85 8GB / 256GB", u: 205, g: true, b: "new" },
+      { n: "Poco M6 Pro 8GB / 256GB", u: null, g: false, gs: true },
+      { n: "Poco M7 6GB / 128GB", u: null, g: false, gs: true, b: "new" },
+      { n: "Poco M7 8GB / 256GB", u: 220, g: true, b: "new" },
+      { n: "Redmi A5 3GB / 64GB", u: null, g: false, gs: true },
+      { n: "Redmi A5 4GB / 128GB", u: 160, g: true },
+      { n: "Redmi A7 Pro 4GB / 64GB", u: 160, g: true, gs: true, b: "new" },
+      { n: "Redmi A7 Pro 4GB / 128GB", u: 175, g: true, b: "new" },
+      { n: "Redmi 15C 4GB / 128GB", u: null, g: false, gs: true },
+      { n: "Redmi 15C 8GB / 256GB", u: null, g: false },
+      { n: "Redmi 15 6GB / 128GB", u: null, g: false, gs: true },
+      { n: "Redmi 15 8GB / 256GB", u: 240, g: true },
+      { n: "Note 14 6GB / 128GB", u: null, g: false, gs: true },
+      { n: "Note 14 8GB / 256GB", u: null, g: false },
+      { n: "Note 14 Pro 8GB / 256GB", u: null, g: false, gs: true },
+      { n: "Note 14 Pro 12GB / 512GB", u: null, g: false },
+      { n: "Note 15 6GB / 128GB", u: 230, g: true, gs: true, b: "new" },
+      { n: "Note 15 8GB / 256GB", u: 255, g: true, b: "new" },
+      { n: "Note 15 Pro 8GB / 256GB", u: 310, g: true, gs: true, b: "new" },
+    ]},
+
+    { seccion: "Xiaomi · Poco · Redmi (5G)", items: [
+      { n: "Poco M8 8GB / 256GB (5G)", u: null, g: false, b: "new" },
+      { n: "Poco M8 8GB / 512GB (5G)", u: 305, g: true, b: "new" },
+      { n: "Poco M8 Pro 8GB / 256GB (5G)", u: null, g: false, gs: true, b: "new" },
+      { n: "Poco M8 Pro 12GB / 512GB (5G)", u: 390, g: true, b: "new" },
+      { n: "Poco X7 8GB / 256GB (5G)", u: null, g: false, gs: true },
+      { n: "Poco X7 Pro 8GB / 256GB (5G)", u: 385, g: true, gs: true },
+      { n: "Poco X7 Pro 12GB / 512GB (5G)", u: 435, g: true },
+      { n: "Poco X8 Pro 8GB / 256GB (5G)", u: null, g: false, gs: true, b: "new" },
+      { n: "Poco X8 Pro 8GB / 512GB (5G)", u: 425, g: true, b: "new" },
+      { n: "Poco X8 Pro Max 12GB / 256GB (5G)", u: 565, g: true, gs: true, b: "new" },
+      { n: "Poco X8 Pro Max 12GB / 512GB (5G)", u: 650, g: true, b: "new" },
+      { n: "Poco F8 Pro 12GB / 256GB (5G)", u: 670, g: true, gs: true },
+      { n: "Poco F8 Pro 12GB / 512GB (5G)", u: 745, g: true },
+      { n: "Poco F8 Ultra 12GB / 256GB (5G)", u: 775, g: true, gs: true },
+      { n: "Note 14 Pro 8GB / 256GB (5G)", u: 320, g: true, gs: true },
+      { n: "Note 14 Pro Plus 8GB / 256GB (5G)", u: 355, g: true, gs: true },
+      { n: "Note 14 Pro Plus 12GB / 512GB (5G)", u: 450, g: true },
+      { n: "Note 15 8GB / 256GB (5G)", u: 295, g: true, gs: true, b: "new" },
+      { n: "Note 15 Pro 8GB / 512GB (5G)", u: 370, g: true, gs: true, b: "new" },
+      { n: "Note 15 Pro Plus 8GB / 256GB (5G)", u: 420, g: true, gs: true, b: "new" },
+      { n: "Xiaomi 15 12GB / 512GB (5G)", u: 915, g: true, gs: true },
+      { n: "Xiaomi 15T 12GB / 512GB (5G)", u: 800, g: true, gs: true },
+      { n: "Xiaomi 15T Pro 12GB / 1TB (5G)", u: 855, g: true, gs: true },
+      { n: "Xiaomi 17 12GB / 512GB (5G)", u: 990, g: true, gs: true, b: "new" },
+      { n: "Xiaomi 17 Ultra 16GB / 512GB (5G)", u: 1630, g: true, gs: true, b: "new" },
+    ]},
+
+    { seccion: "Xiaomi · Tablets", items: [
+      { n: "Redmi Pad 2 11\" · 4GB / 128GB", u: 240, g: true },
+      { n: "Redmi Pad 2 11\" · 8GB / 256GB", u: 300, g: true },
+      { n: "Redmi Pad 2 Pro 12.1\" · 6GB / 128GB", u: 325, g: true, gs: true },
+      { n: "Mi Pad 7 11.2\" · 8GB / 128GB", u: 415, g: true, gs: true },
+      { n: "Poco Pad M1 12.1\" · 8GB / 256GB", u: 355, g: true, gs: true, b: "new" },
+      { n: "Poco Pad X1 11.2\" · 8GB / 512GB", u: 435, g: true, gs: true, b: "new" },
+    ]},
+
+    { seccion: "OnePlus", items: [
+      { n: "OnePlus 13 16GB / 512GB (5G)", u: 1290, g: false, b: "pedido" },
+      { n: "OnePlus 15R 12GB / 256GB (5G)", u: 905, g: false, gs: true, b: "pedido" },
+      { n: "OnePlus 15R 12GB / 512GB (5G)", u: 1065, g: false, b: "pedido" },
+      { n: "OnePlus 15 12GB / 256GB (5G)", u: 1130, g: false, gs: true, b: "pedido" },
+      { n: "OnePlus 15 16GB / 512GB (5G)", u: 1240, g: false, b: "pedido" },
+    ]},
+
+    { seccion: "Google Pixel", items: [
+      { n: "Pixel 10A 8GB / 128GB (5G)", u: 725, g: false, b: "new" },
+      { n: "Pixel 10A 8GB / 256GB (5G)", u: 850, g: false, b: "new" },
+      { n: "Pixel 10 12GB / 128GB (5G)", u: 980, g: false, gs: true, b: "pedido" },
+      { n: "Pixel 10 12GB / 256GB (5G)", u: 1180, g: false, b: "pedido" },
+      { n: "Pixel 10 Pro 16GB / 128GB (5G)", u: 1275, g: false, gs: true, b: "pedido" },
+      { n: "Pixel 10 Pro 16GB / 256GB (5G)", u: 1395, g: false, b: "pedido" },
+      { n: "Pixel 10 Pro 16GB / 512GB (5G)", u: 1525, g: false, b: "pedido" },
+      { n: "Pixel 10 Pro XL 16GB / 256GB (5G)", u: 1505, g: false, gs: true, b: "pedido" },
+      { n: "Pixel 10 Pro XL 16GB / 512GB (5G)", u: 1640, g: false, b: "pedido" },
+    ]},
+
+    { seccion: "Consolas · Accesorios · Parlantes", items: [
+      { n: "Nintendo Switch 2 256GB", u: 675, g: true },
+      { n: "Nintendo Switch 2 256GB (Mario Kart)", u: 705, g: true },
+      { n: "PS5 Slim 1TB Digital", u: 690, g: true, gs: true },
+      { n: "PS5 Slim 1TB Digital + Astro Bot + Gran Turismo 7", u: 705, g: true },
+      { n: "PS5 Slim 1TB c/Lectora", u: 730, g: true },
+      { n: "PS5 Pro 2TB Digital", u: 1175, g: true },
+      { n: "Joystick DualSense PS5 (original)", u: null, g: false },
+      { n: "Meta Quest 3S 128GB", u: 510, g: true, gs: true },
+      { n: "Meta Quest 3 512GB", u: 760, g: true },
+      { n: "Volante Logitech G29 (PC/PS3/PS4/PS5)", u: 360, g: true, gs: true },
+      { n: "Volante Logitech G923 (Xbox/PC)", u: 480, g: true },
+      { n: "JBL Clip 5 / Flip 6 / Charge 5 / Xtreme 4 / Boombox 3", u: null, g: false, gs: true },
+      { n: "Harman Kardon Onyx Studio 8/9 · Aura Studio 3/4 · Go+Play 3", u: null, g: false },
+    ]},
+  ],
+
+  // ── PESTAÑA 2: MACBOOK · iPAD · iMAC ─────────────────────
+
+  mac: [
+    { seccion: "MacBook Neo · A18 Pro", b_seccion: "new", items: [
+      { n: "MacBook Neo A18 Pro 13\" · 8GB / 256GB", s: "6CPU · 5GPU", u: 780, g: true },
+      { n: "MacBook Neo A18 Pro 13\" · 8GB / 512GB", s: "6CPU · 5GPU", u: 885, g: true },
+    ]},
+    { seccion: "MacBook Air M4", items: [
+      { n: "MacBook Air 13.6\" M4 · 16GB / 256GB", s: "10CPU · 8GPU", u: 1180, g: true },
+      { n: "MacBook Air 13.6\" M4 · 16GB / 1TB", s: "10CPU · 10GPU", u: 1330, g: true },
+      { n: "MacBook Air 15.3\" M4 · 16GB / 256GB", s: "10CPU · 10GPU", u: null, g: false, gs: true },
+      { n: "MacBook Air 15.3\" M4 · 16GB / 512GB", s: "10CPU · 10GPU", u: null, g: false },
+      { n: "MacBook Air 15.3\" M4 · 24GB / 512GB", s: "10CPU · 10GPU", u: null, g: false },
+    ]},
+    { seccion: "MacBook Air M5", b_seccion: "new", items: [
+      { n: "MacBook Air 13.6\" M5 · 16GB / 512GB", s: "10CPU · 8GPU", u: 1250, g: true },
+      { n: "MacBook Air 13.6\" M5 · 16GB / 1TB", s: "10CPU · 10GPU", u: 1480, g: true },
+      { n: "MacBook Air 13.6\" M5 · 24GB / 1TB", s: "10CPU · 10GPU", u: 1720, g: true },
+      { n: "MacBook Air 15.3\" M5 · 16GB / 512GB", s: "10CPU · 10GPU", u: 1480, g: true, gs: true },
+      { n: "MacBook Air 15.3\" M5 · 16GB / 1TB", s: "10CPU · 10GPU", u: 1720, g: true },
+      { n: "MacBook Air 15.3\" M5 · 24GB / 1TB", s: "10CPU · 10GPU", u: 1930, g: true },
+    ]},
+    { seccion: "MacBook Pro M5", b_seccion: "new", items: [
+      { n: "MacBook Pro 14.2\" M5 · 16GB / 512GB", s: "10CPU · 10GPU", u: null, g: false },
+      { n: "MacBook Pro 14.2\" M5 · 16GB / 1TB", s: "10CPU · 10GPU", u: 1980, g: true },
+      { n: "MacBook Pro 14.2\" M5 · 24GB / 1TB", s: "10CPU · 10GPU", u: 2240, g: true },
+      { n: "MacBook Pro 14.2\" M5 Pro · 24GB / 1TB", s: "15CPU · 16GPU", u: 2550, g: true, gs: true },
+      { n: "MacBook Pro 14.2\" M5 Pro · 24GB / 2TB", s: "15CPU · 16GPU", u: 3000, g: true },
+      { n: "MacBook Pro 16\" M5 Pro · 48GB / 1TB", s: "18CPU · 20GPU", u: 3580, g: true, gs: true },
+    ]},
+    { seccion: "Mac Mini M4", items: [
+      { n: "Mac Mini M4 · 16GB / 256GB", u: null, g: false },
+      { n: "Mac Mini M4 · 16GB / 512GB", u: 1160, g: true },
+      { n: "Mac Mini M4 · 24GB / 512GB", u: null, g: false },
+      { n: "Mac Mini M4 Pro · 24GB / 512GB", u: null, g: false },
+      { n: "Mac Mini M4 Pro · 24GB / 1TB", u: null, g: false },
+    ]},
+    { seccion: "iPad", items: [
+      { n: "iPad A16 11\" · 128GB (2025)", u: 435, g: true },
+      { n: "iPad A16 11\" · 256GB (2025)", u: 545, g: true },
+      { n: "iPad Mini 7ma Gen (A17 Pro) · 128GB", u: null, g: false, gs: true },
+      { n: "iPad Mini 7ma Gen (A17 Pro) · 256GB", u: null, g: false },
+      { n: "iPad Air (M3) 11\" · 128GB (2025)", u: 610, g: true, gs: true },
+      { n: "iPad Air (M3) 11\" · 256GB (2025)", u: 720, g: true },
+      { n: "iPad Air (M4) 11\" · 128GB (2026)", u: 680, g: true, gs: true, b: "new" },
+      { n: "iPad Air (M4) 11\" · 256GB (2026)", u: 790, g: true, b: "new" },
+      { n: "iPad Air (M4) 13\" · 128GB (2026)", u: 920, g: true, gs: true, b: "new" },
+      { n: "iPad Air (M4) 13\" · 512GB (2026)", u: 1040, g: true, b: "new" },
+      { n: "iPad Pro M5 11\" · 256GB", u: 1100, g: true, gs: true, b: "new" },
+      { n: "iPad Pro M5 11\" · 512GB", u: 1310, g: true, b: "new" },
+      { n: "iPad Pro M5 13\" · 256GB", u: 1390, g: true, gs: true, b: "new" },
+      { n: "iPad Pro M5 13\" · 512GB", u: 1580, g: true, b: "new" },
+    ]},
+    { seccion: "iMac · Mac Studio", items: [
+      { n: "iMac M4 · 16GB / 256GB 24\" (8CPU)", u: null, g: false },
+      { n: "iMac M4 · 16GB / 256GB 24\" (10CPU)", u: null, g: false },
+      { n: "iMac M4 · 16GB / 512GB 24\" (10CPU)", u: null, g: false },
+      { n: "iMac M4 · 24GB / 512GB 24\" (10CPU)", u: null, g: false },
+      { n: "Mac Studio Display 27\"", u: null, g: false, gs: true },
+    ]},
+  ],
+
+  // ── PESTAÑA 3: NOTEBOOKS ──────────────────────────────────
+
+  note: [
+    { seccion: "ASUS", items: [
+      { n: "ASUS E1504GA-WS35", s: "Intel Core i3-N305 · 8GB · 256GB SSD · 15.6\" FHD · Win11 · Silver", u: 520, g: true },
+      { n: "ASUS E1504FA-WS51", s: "Ryzen 5 7520U · 8GB · 512GB SSD · 15.6\" FHD · Win11 · Black", u: 570, g: true, gs: true },
+      { n: "ASUS F1504VAP-WH56", s: "Intel Core 5 120U · 16GB · 512GB SSD · 15.6\" FHD · Win11 · Silver", u: 725, g: true, gs: true },
+      { n: "ASUS X1607QA", s: "Snapdragon X · 16GB · 1TB SSD · 16\" FHD · Win11 · Silver", u: 790, g: true, gs: true },
+    ]},
+    { seccion: "Acer", items: [
+      { n: "Acer AG15-42P-R917", s: "Ryzen 7 7730U · 16GB · 512GB SSD · 15.6\" FHD · Win11 · Silver", u: 770, g: true },
+    ]},
+    { seccion: "HP", items: [
+      { n: "HP 15-FD0133WM", s: "Intel Core i3 · 8GB · 256GB SSD · 15.6\" FHD · Win11 · Silver", u: 535, g: true },
+      { n: "HP 15-EH1070WM", s: "R7-5700U · 8GB · 512GB SSD · 15.6\" FHD · Win11 · Blue", u: null, g: false, gs: true },
+    ]},
+    { seccion: "Lenovo", items: [
+      { n: "Lenovo 83XY00G8US", s: "Ryzen 7 7730U · 16GB · 512GB SSD · 15.6\" FHD Touch · Win11 · Gray", u: 855, g: true },
+      { n: "Lenovo 83CR003UUS", s: "Ryzen 7 7730U · 16GB · 1TB SSD · 15.6\" FHD · Win11 · Gray", u: 920, g: true, gs: true },
+    ]},
+    { seccion: "Dell", items: [
+      { n: "Dell LDC15250-7427", s: "Intel Core i7-1355U · 16GB · 512GB SSD · 15.6\" FHD Touch · Win11 · Black", u: 930, g: true },
+      { n: "Dell LDC15250-7292", s: "Intel Core i7-1355U · 16GB · 1TB SSD · 15.6\" FHD Touch · Win11 · Black", u: 975, g: true, gs: true },
+      { n: "Dell 13535", s: "R5-7520U · 8GB · 512GB SSD · 15.6\" FHD · Win11 · Black", u: null, g: false, gs: true },
+      { n: "Dell I3520-5117BLK-PUS", s: "i5-1235U · 8GB · 512GB SSD · 15.6\" FHD · Win11 · Black", u: null, g: false },
+      { n: "Dell I3535-A735BLK", s: "R7-7730U · 16GB · 1TB SSD · 15.6\" FHD Touch · Win11 · Black", u: null, g: false },
+    ]},
+  ],
+};
+
+// ============================================================
+//  ⚙️  MOTOR — No necesitás tocar nada de acá para abajo
+// ============================================================
+
+function fmt(n) {
+  return '$' + Math.round(n).toLocaleString('es-AR');
+}
+
+function renderSecciones(secciones, dolarActual) {
+  return secciones.map(sec => {
+    const titleBadge = sec.b_seccion
+      ? ` <span class="badge-new">new</span>` : '';
+    const rows = sec.items.map(p => {
+      const gs = p.gs ? ' group-start' : '';
+      const usdTxt = p.u ? `U$S ${p.u.toLocaleString('es-AR')}` : '—';
+      const arsTxt = p.u ? fmt(p.u * (dolarActual || DOLAR)) : '—';
+      const arsClass = p.u ? '' : ' zero';
+      const stockClass = p.g ? 'in' : 'consult';
+      const stockTxt = p.g ? 'Stock' : 'Consultar';
+      const badge = p.b === 'new'
+        ? ' <span class="badge-new">new</span>'
+        : p.b === 'pedido'
+          ? ' <span class="badge-pedido">A pedido</span>'
+          : '';
+      const sub = p.s ? `<div class="product-sub">${p.s}</div>` : '';
+      return `<div class="product-row${gs}">
+        <div><div class="product-name">${p.n}${badge}</div>${sub}</div>
+        <div class="price-usd">${usdTxt}</div>
+        <div class="price-ars${arsClass}">${arsTxt}</div>
+        <div class="stock-cell"><span class="stock-pill ${stockClass}">${stockTxt}</span></div>
+      </div>`;
+    }).join('');
+    return `<div class="section">
+      <div class="section-header">
+        <span class="section-title">${sec.seccion}${titleBadge}</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="table-wrap">
+        <div class="col-header">
+          <span>Modelo</span><span>USD</span><span>Pesos</span><span>Stock</span>
+        </div>
+        ${rows}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Tabs renderizados por fetchDolar()
+
+// Dolar display — se actualiza automáticamente desde dolarapi.com
+async function fetchDolar() {
+  try {
+    const res = await fetch('https://dolarapi.com/v1/dolares/blue');
+    const data = await res.json();
+    const venta = data.venta + 15;
+    // Actualizamos la constante global y re-renderizamos precios
+    window.DOLAR_LIVE = venta;
+    document.getElementById('dolar-display').textContent = '$' + venta.toLocaleString('es-AR');
+    document.getElementById('dolar-display').title = 'Dólar Blue · venta · dolarapi.com';
+    // Re-renderizar con precio actualizado
+    renderAll(venta);
+  } catch(e) {
+    // Si falla, usa el valor hardcodeado
+    document.getElementById('dolar-display').textContent = '$' + DOLAR.toLocaleString('es-AR');
+    renderAll(DOLAR);
+  }
+}
+
+function renderAll(dolarActual) {
+  document.getElementById('tab-cels').innerHTML = renderSecciones(CATALOGO.cels, dolarActual);
+  document.getElementById('tab-mac').innerHTML = renderSecciones(CATALOGO.mac, dolarActual);
+  const noteNotice2 = `<div class="notices" style="margin-bottom:28px">
+    <div class="notice">Consultar instalación de sistema operativo y programas</div>
+    <div class="notice">Todas las notebooks tienen entre 6 y 12 meses de garantía</div>
+    <div class="notice">Trabajamos muchos modelos más — consultanos</div>
+  </div>`;
+  document.getElementById('tab-note').innerHTML = noteNotice2 + renderSecciones(CATALOGO.note, dolarActual);
+}
+
+fetchDolar();
+
+function showTab(id, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
